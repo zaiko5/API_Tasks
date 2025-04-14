@@ -1,7 +1,6 @@
 package com.taskList.ServiceImpl;
 
 import com.taskList.DTOs.TaskDto;
-import com.taskList.Domain.Task;
 import com.taskList.Entities.TaskEntity;
 import com.taskList.Mappers.TaskMapper;
 import com.taskList.Repository.TaskRepository;
@@ -62,8 +61,10 @@ public class TaskServiceImpl implements TaskService {
             // Guardar entidad en la base de datos
             TaskEntity savedTask = taskRepository.save(taskEntity);
 
+            TaskEntity newTask = taskRepository.findFirstByOrderByIdDesc();
+
             // Convertir la entidad guardada nuevamente a DTO
-            TaskDto taskDto = TaskMapper.toDTO(savedTask);
+            TaskDto taskDto = TaskMapper.toDTO(newTask);
 
             return taskDto;
         }
@@ -71,35 +72,17 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public Task putTask(Task task) {
-        for (int i = 0; i < tasks.size(); i++) {
-            if (tasks.get(i).getId() == task.getId()) {
-                tasks.set(i, task);
-                return task;
-            }
-        }
+    public TaskDto putTask(TaskDto task) {
         return null;
     }
 
     @Override
-    public Task patchTask(Task task) {
-        for(Task t : tasks){
-            if(t.getId() == task.getId()){
-                if(task.getPetition() != null && !task.getPetition().isEmpty()){
-                    t.setPetition(task.getPetition());
-                }
-                if(task.getStatus() != null && !task.getStatus().isEmpty()){
-                    t.setStatus(task.getStatus());
-                }
-                return task;
-            }
-        }
+    public TaskDto patchTask(TaskDto task) {
         return null;
     }
 
     @Override
     public boolean deleteTask(int id) {
-        boolean removed = tasks.removeIf(t -> t.getId() == id);
-        return removed;  // Si la tarea fue eliminada, removed será true, si no, será false.
+        return false;
     }
 }
