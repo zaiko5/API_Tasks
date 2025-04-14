@@ -17,13 +17,6 @@ import java.util.Optional;
 @Service
 public class TaskServiceImpl implements TaskService {
 
-    private List<TaskEntity> tasks = new ArrayList<>(Arrays.asList(
-            new TaskEntity(1, "Do nothing", "Done"),
-            new TaskEntity(2, "Do the homework", "Not done"),
-            new TaskEntity(3, "Learning about apis", "Not done"),
-            new TaskEntity(4, "Learning about queries in spring boot", "To do")
-    ));
-
     @Autowired
     @Lazy
     TaskRepository taskRepository;
@@ -39,7 +32,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public Object getTaskID(int id) {
+    public TaskDto getTaskID(int id) {
         Optional<TaskEntity> taskOptional = taskRepository.findById((long) id);
         if (taskOptional.isPresent()) {
             TaskEntity task = taskOptional.get();
@@ -51,7 +44,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public Object postTask(TaskDto task) {
+    public TaskDto postTask(TaskDto task) {
         if(task.getPetition() != null && !task.getPetition().isEmpty() && //Doesn't get a field petition null or void
                 task.getStatus() != null && !task.getStatus().isEmpty()){ //Doesn't get a field status null or void.
             //If all the validations are met, we add the task to the task-list.
@@ -61,10 +54,8 @@ public class TaskServiceImpl implements TaskService {
             // Guardar entidad en la base de datos
             TaskEntity savedTask = taskRepository.save(taskEntity);
 
-            TaskEntity newTask = taskRepository.findFirstByOrderByIdDesc();
-
             // Convertir la entidad guardada nuevamente a DTO
-            TaskDto taskDto = TaskMapper.toDTO(newTask);
+            TaskDto taskDto = TaskMapper.toDTO(savedTask);
 
             return taskDto;
         }
