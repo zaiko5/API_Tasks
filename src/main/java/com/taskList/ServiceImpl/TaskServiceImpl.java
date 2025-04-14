@@ -15,11 +15,11 @@ import java.util.List;
 @Service
 public class TaskServiceImpl implements TaskService {
 
-    private List<Task> tasks = new ArrayList<>(Arrays.asList(
-            new Task(1, "Do nothing", "Done"),
-            new Task(2, "Do the homework", "Not done"),
-            new Task(3, "Learning about apis", "Not done"),
-            new Task(4, "Learning about queries in spring boot", "To do")
+    private List<TaskEntity> tasks = new ArrayList<>(Arrays.asList(
+            new TaskEntity(1, "Do nothing", "Done"),
+            new TaskEntity(2, "Do the homework", "Not done"),
+            new TaskEntity(3, "Learning about apis", "Not done"),
+            new TaskEntity(4, "Learning about queries in spring boot", "To do")
     ));
 
     @Autowired
