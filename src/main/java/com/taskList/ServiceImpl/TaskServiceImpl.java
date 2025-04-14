@@ -41,24 +41,31 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public Object getTaskID(int id) {
-        Optional<TaskEntity> taskOptional = taskRepository.findById(id);
+        Optional<TaskEntity> taskOptional = taskRepository.findById((long) id);
         if (taskOptional.isPresent()) {
             TaskEntity task = taskOptional.get();
             TaskDto taskDto = TaskMapper.toDTO(task);
             return taskDto;
         } else {
-            return "No se ha encontrado usuario con el id: " + id;
+            return null;
         }
     }
 
     @Override
-    public Task postTask(Task task) {
+    public Object postTask(TaskDto task) {
         if(task.getPetition() != null && !task.getPetition().isEmpty() && //Doesn't get a field petition null or void
-        task.getStatus() != null && !task.getStatus().isEmpty()){ //Doesn't get a field status null or void.
+                task.getStatus() != null && !task.getStatus().isEmpty()){ //Doesn't get a field status null or void.
             //If all the validations are met, we add the task to the task-list.
-            task.setId(tasks.size() + 1);
-            tasks.add(task);
-            return task;
+            // Convertir DTO a entidad antes de guardar
+            TaskEntity taskEntity = TaskMapper.toEntity(task);
+
+            // Guardar entidad en la base de datos
+            TaskEntity savedTask = taskRepository.save(taskEntity);
+
+            // Convertir la entidad guardada nuevamente a DTO
+            TaskDto taskDto = TaskMapper.toDTO(savedTask);
+
+            return taskDto;
         }
         return null;
     }

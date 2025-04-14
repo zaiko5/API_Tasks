@@ -38,8 +38,8 @@ public class TaskControllers {
     }
 
     @PostMapping
-    public ResponseEntity<Object> postTask(@RequestBody Task task){
-        Task newTask = taskService.postTask(task);
+    public ResponseEntity<Object> postTask(@RequestBody TaskDto task){
+        TaskDto newTask = (TaskDto) taskService.postTask(task);
         if(newTask == null){
             return ResponseEntity.status(400).body("Campos faltantes para el objeto: " + task);
         }
