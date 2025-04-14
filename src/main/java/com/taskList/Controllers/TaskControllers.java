@@ -53,4 +53,14 @@ public class TaskControllers {
         }
         return ResponseEntity.ok(taskDto);
     }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<Object> patchTaskID(@PathVariable int id, @RequestBody Task task) {
+        task.setId(id);
+        Task newTask = taskService.patchTask(task);
+        if(newTask == null){
+            return ResponseEntity.status(404).body("No se ha encontrado una tarea con id: " + id);
+        }
+        return ResponseEntity.ok().build();
+    }
 }
