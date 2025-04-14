@@ -1,7 +1,9 @@
 package com.taskList.ServiceImpl;
 
+import com.taskList.DTOs.TaskDto;
 import com.taskList.Domain.Task;
 import com.taskList.Entities.TaskEntity;
+import com.taskList.Mappers.TaskMapper;
 import com.taskList.Repository.TaskRepository;
 import com.taskList.Services.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class TaskServiceImpl implements TaskService {
@@ -27,8 +30,10 @@ public class TaskServiceImpl implements TaskService {
     TaskRepository taskRepository;
 
     @Override
-    public List<TaskEntity> getTasks() {
-        return taskRepository.findAll();
+    public List<TaskDto> getTasks() {
+        return tasks.stream()
+                .map(TaskMapper::toDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
