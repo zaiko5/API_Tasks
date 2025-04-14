@@ -62,4 +62,13 @@ public class TaskControllers {
         }
         return ResponseEntity.ok().body(newTask);
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Object> deleteTaskID(@PathVariable int id){
+        boolean deleted = taskService.deleteTask(id);
+        if(deleted){
+            return ResponseEntity.status(204).build();
+        }
+        return ResponseEntity.status(404).body("No se ha encontrado una tarea con id: " + id);
+    }
 }
