@@ -30,7 +30,7 @@ public class TaskControllers {
 
     @GetMapping("/{id}")
     public ResponseEntity<Object> getTaskID(@PathVariable int id) {
-        Task task = taskService.getTaskID(id);
+        TaskDto task = (TaskDto) taskService.getTaskID(id);
         if(task == null){
             return ResponseEntity.status(404).body("No se ha encontrado la tarea con id: " + id);
         }

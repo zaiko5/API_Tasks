@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 @Service
 public class TaskServiceImpl implements TaskService {
@@ -40,13 +40,15 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public Task getTaskID(int id) {
-        for(Task t : tasks){
-            if(t.getId() == id){
-                return t;
-            }
+    public Object getTaskID(int id) {
+        Optional<TaskEntity> taskOptional = taskRepository.findById(id);
+        if (taskOptional.isPresent()) {
+            TaskEntity task = taskOptional.get();
+            TaskDto taskDto = TaskMapper.toDTO(task);
+            return taskDto;
+        } else {
+            return "No se ha encontrado usuario con el id: " + id;
         }
-        return null;
     }
 
     @Override
