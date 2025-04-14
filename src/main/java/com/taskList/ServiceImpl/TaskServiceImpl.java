@@ -72,9 +72,27 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public TaskDto putTask(TaskDto task) {
+    public TaskDto putTask(TaskDto task, int id) {
+        if (task.getPetition() != null && !task.getPetition().isEmpty() &&
+                task.getStatus() != null && !task.getStatus().isEmpty()) {
+
+            Optional<TaskEntity> taskOptional = taskRepository.findById((long) id);
+            if (taskOptional.isPresent()) {
+                TaskEntity existingTask = taskOptional.get();
+
+                // Actualizar los campos
+                existingTask.setPetition(task.getPetition());
+                existingTask.setStatus(task.getStatus());
+
+                // Guardar los cambios (esto sí hace UPDATE)
+                TaskEntity updatedTask = taskRepository.save(existingTask);
+
+                return TaskMapper.toDTO(updatedTask);
+            }
+        }
         return null;
     }
+
 
     @Override
     public TaskDto patchTask(TaskDto task) {
