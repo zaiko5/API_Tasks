@@ -1,5 +1,6 @@
 package com.taskList.Controllers;
 
+import com.taskList.DTOs.TaskDto;
 import com.taskList.Domain.Task;
 import com.taskList.Entities.TaskEntity;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,7 @@ public class TaskControllers {
 
     @GetMapping
     public ResponseEntity<Object> getTasks() {
-        List<TaskEntity> tasks = taskService.getTasks();
+        List<TaskDto> tasks = taskService.getTasks();
         if (tasks.isEmpty()) {
             return ResponseEntity.status(404).body("No hay tareas para mostrar");
         }

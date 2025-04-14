@@ -31,9 +31,12 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public List<TaskDto> getTasks() {
-        return tasks.stream()
-                .map(TaskMapper::toDTO)
-                .collect(Collectors.toList());
+        List<TaskEntity> entities = taskRepository.findAll();
+        ArrayList<TaskDto> dtos = new ArrayList<>();
+        for (TaskEntity entity : entities) {
+            dtos.add(TaskMapper.toDTO(entity));
+        }
+        return dtos;
     }
 
     @Override
