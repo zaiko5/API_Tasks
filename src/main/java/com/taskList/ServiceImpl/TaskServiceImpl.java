@@ -148,7 +148,7 @@ public class TaskServiceImpl implements TaskService {
              * NOTA: Cuando se obtiene el optional de findById, si se obtiene todo el objeto pero los campos se cambian cuando usamos setTal con los valores de getTal (El objeto pasado DTO).
              */
         }
-        return null;
+        throw new TareaNoEncontradaException(id);
     }
 
     /**
