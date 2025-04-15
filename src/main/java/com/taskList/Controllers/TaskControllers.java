@@ -26,10 +26,7 @@ public class TaskControllers {
     @GetMapping
     public ResponseEntity<Object> getTasks() {
         List<TaskDto> tasks = taskService.getTasks(); //Obteniendo las listas de tareas desde el servicio.
-        if (tasks.isEmpty()) { //Si esta vacia la lista se manda el codigo 404.
-            return ResponseEntity.status(404).body("No hay tareas para mostrar");
-        } //Si no, se manda el codigo 200
-        return ResponseEntity.ok(tasks);
+        return ResponseEntity.ok(tasks); //Retornando el codigo de salida 200 y la lista de tareas.
     }
 
     /**

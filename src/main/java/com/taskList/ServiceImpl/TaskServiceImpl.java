@@ -2,6 +2,7 @@ package com.taskList.ServiceImpl;
 
 import com.taskList.DTOs.TaskDto;
 import com.taskList.Entities.TaskEntity;
+import com.taskList.Exception.ListaVaciaException;
 import com.taskList.Mappers.TaskMapper;
 import com.taskList.Repository.TaskRepository;
 import com.taskList.Services.TaskService;
@@ -32,7 +33,10 @@ public class TaskServiceImpl implements TaskService {
         for (TaskEntity entity : entities) {
             dtos.add(TaskMapper.toDTO(entity)); //Agregamos a la lista dto la entidad transformada a dto.
         }
-        return dtos; //Retornamos la lista de dtos.
+        if(dtos.isEmpty()){ //Si la lista es una lista vacia.
+            throw new ListaVaciaException(); //Se tira la excepcion del tipo listaVaciaException.
+        }
+        return dtos; //Retornamos la lista de dtos si no esta vacia.
     }
 
     /**
