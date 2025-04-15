@@ -15,4 +15,12 @@ public class GlobalExceptionHandler {
         //Se lanzará un codigo de error 404 mapenado la palabra errorcon el mensaje que tiene la excepcion.
         return ResponseEntity.status(404).body(Map.of("error: ", e.getMessage()));
     }
+
+    //Cuando salga la excepcion de este tipo, se llamará a esta funcion para capturar esa excepcion.
+    @ExceptionHandler(TareaNoEncontradaException.class)
+    //Usamos como parámetro el objeto de la excepcion, se pasará automaticamente cuando se lance la excepcion.
+    public ResponseEntity<Object> handleTareaNoEncontradaException(TareaNoEncontradaException e){
+        //Cuando se lance la excepcion se retornará un codigo de error 404 con el mensaje de la excepcion.
+        return ResponseEntity.status(404).body(Map.of("error: ", e.getMessage()));
+    }
 }

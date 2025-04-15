@@ -3,6 +3,7 @@ package com.taskList.ServiceImpl;
 import com.taskList.DTOs.TaskDto;
 import com.taskList.Entities.TaskEntity;
 import com.taskList.Exception.ListaVaciaException;
+import com.taskList.Exception.TareaNoEncontradaException;
 import com.taskList.Mappers.TaskMapper;
 import com.taskList.Repository.TaskRepository;
 import com.taskList.Services.TaskService;
@@ -24,7 +25,7 @@ public class TaskServiceImpl implements TaskService {
 
     /**
      * Peticion get para obtener todas las tareas
-     * @return una lista del tipo dto (presentar la informacion) con todas las tareas.
+     * @return una lista del tipo dto (presentar la informacion) con todas las tareas, o en su caso, se lanza una excepcion del tipo ListaVaciaException capturada desde el Handler.
      */
     @Override
     public List<TaskDto> getTasks() {
@@ -42,7 +43,7 @@ public class TaskServiceImpl implements TaskService {
     /**
      * Peticion get para retornar una tarea especifica.
      * @param id pasado por path desde el getMapping
-     * @return un objeto dto para mostrar o en su caso, nada.
+     * @return un objeto dto para mostrar o en su caso, se lanza una excepcion personalizada capturada desde el handle.
      */
     @Override
     public TaskDto getTaskID(int id) {
@@ -51,9 +52,8 @@ public class TaskServiceImpl implements TaskService {
             TaskEntity task = taskOptional.get(); //Abstrayendo la entidad a un objeto entidad
             TaskDto taskDto = TaskMapper.toDTO(task); //Transformando a un objeto dto.
             return taskDto; //Retornamos la tarea en dto.
-        } else { //Si no hay nada, retornamos null.
-            return null;
         }
+        throw new TareaNoEncontradaException(id); //Lanzamos la excepcion y le pasamos al constructor el id de la tarea no encontrada.
     }
 
     /**

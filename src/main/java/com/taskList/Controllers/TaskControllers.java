@@ -21,7 +21,7 @@ public class TaskControllers {
 
     /**
      * Peticion get para obtener todas las tareas de la BBDD.
-     * @return Un mensaje RE dependiendo de si se retorna algo o no.
+     * @return Un mensaje 200, la excepcion se maneja en el servicio con el handler.
      */
     @GetMapping
     public ResponseEntity<Object> getTasks() {
@@ -32,15 +32,12 @@ public class TaskControllers {
     /**
      * Peticion get para obtener una tarea por id
      * @param id pasado por path
-     * @return un codigo de estado dependiendo de si se encontro la tarea o no
+     * @return un codigo 200, la excepcion se maneja en el servicio con el handler.
      */
     @GetMapping("/{id}")
     public ResponseEntity<Object> getTaskID(@PathVariable int id) {
         TaskDto task = taskService.getTaskID(id); //Obtenemos la tarea desde el servicio
-        if(task == null){ //Si no existe la tarea
-            return ResponseEntity.status(404).body("No se ha encontrado la tarea con id: " + id);
-        }
-        return ResponseEntity.ok(task);
+        return ResponseEntity.ok(task); //Retornando el codigo de salida 200 y la tarea seleccionada.
     }
 
     /**
