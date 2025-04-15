@@ -23,4 +23,11 @@ public class GlobalExceptionHandler {
         //Cuando se lance la excepcion se retornará un codigo de error 404 con el mensaje de la excepcion.
         return ResponseEntity.status(404).body(Map.of("error: ", e.getMessage()));
     }
+
+    //Definiendo que este metodo solo se usará cuando haya una excepcion del tipo camposFaltantes.
+    @ExceptionHandler(CamposFaltantesException.class)
+    public ResponseEntity<Object> handleCamposFaltantesException(CamposFaltantesException e){
+        //Retornamos un codigo de error 400 con el mensaje de la excepcion.
+        return ResponseEntity.status(400).body((Map.of("error: ", e.getMessage())));
+    }
 }

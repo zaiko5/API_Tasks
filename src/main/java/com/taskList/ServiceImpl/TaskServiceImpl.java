@@ -2,6 +2,7 @@ package com.taskList.ServiceImpl;
 
 import com.taskList.DTOs.TaskDto;
 import com.taskList.Entities.TaskEntity;
+import com.taskList.Exception.CamposFaltantesException;
 import com.taskList.Exception.ListaVaciaException;
 import com.taskList.Exception.TareaNoEncontradaException;
 import com.taskList.Mappers.TaskMapper;
@@ -79,7 +80,7 @@ public class TaskServiceImpl implements TaskService {
 
             return taskDto; //Retornamos la entidad convertida a DTO
         }
-        return null;
+        throw new CamposFaltantesException(); //Lanzamos una excepcion del tipo campos faltantes.
     }
 
     /**

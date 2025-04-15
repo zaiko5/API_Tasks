@@ -43,14 +43,11 @@ public class TaskControllers {
     /**
      * Peticion post para agregar una nueva tarea
      * @param task pasado por JSON
-     * @return un codigo de estado dependiendo de si se pudo agregar la tarea o no
+     * @return el codigo de estado 201, la excepcion se maneja en el servicio con el handler en cuanto se lanza.
      */
     @PostMapping
     public ResponseEntity<Object> postTask(@RequestBody TaskDto task){
         TaskDto newTask = taskService.postTask(task);
-        if(newTask == null){
-            return ResponseEntity.status(400).body("Campos faltantes para el objeto: " + task);
-        }
         return ResponseEntity.status(201).body(newTask);
     }
 
