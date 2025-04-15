@@ -12,5 +12,5 @@ public interface TaskService {
     TaskDto postTask(TaskDto task); //Return just the task created.
     TaskDto putTask(TaskDto task, int id); //Return just the task modified.
     TaskDto patchTask(TaskDto task, int id); //Return just the task modified.
-    boolean deleteTask(int id); //It doesn't return something.
+    void deleteTask(int id); //It doesn't return something.
 }

@@ -87,7 +87,7 @@ public class TaskServiceImpl implements TaskService {
      * Peticion put para modificar totalmente un registro.
      * @param task pasado por JSON
      * @param id pasado por Path
-     * @return El objeto DTO modificado o en su caso un null
+     * @return El objeto DTO modificado o en su caso una de las siguientes 2 excepciones: tarea no encontrada o campos vacios.
      */
     @Override
     public TaskDto putTask(TaskDto task, int id) {
@@ -121,7 +121,7 @@ public class TaskServiceImpl implements TaskService {
      * Peticion path para modificar parcialmente una tarea
      * @param task pasado por JSON
      * @param id pasado por poth
-     * @return El objeto modificado o en su caso null
+     * @return El objeto modificado o en su caso una excepcion de tarea no encontrada
      */
     @Override
     public TaskDto patchTask(TaskDto task, int id) {
@@ -153,19 +153,18 @@ public class TaskServiceImpl implements TaskService {
 
     /**
      * Peticion delete para eliminar un registro de la DB.
+     *
      * @param id pasado por path.
-     * @return un booleano que dice si fue eliminao o no el valor.
      */
     @Override
-    public boolean deleteTask(int id) {
+    public void deleteTask(int id) {
         //Verificamos que exista o no la tarea con tal id
         if(taskRepository.existsById((long) id)){
             //Si existe usamos la funcion delete by id y la eliminamos segun el id.
             taskRepository.deleteById((long) id);
-            //Retornamos true diciendo que la tarea fue eliminada correctamenete.
-            return true;
+            return; //Acabamos la funcion.
         }
-        //Retornamos false diciendo que la tarea no fue encontrada.
-        return false;
+        //Si no se entra al if, se lanza una excepcion de tarea no encontrada, manejable desde el Handler.
+        throw new TareaNoEncontradaException(id);
     }
 }

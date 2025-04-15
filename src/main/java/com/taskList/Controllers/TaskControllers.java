@@ -67,7 +67,7 @@ public class TaskControllers {
      * Peticion patch para modificar una tarea parcialmente
      * @param id pasado por path
      * @param task pasado por JSON
-     * @return un codigo de estado
+     * @return un codigo de estado 200, la excepcion se maneja en el servicio.
      */
     @PatchMapping("/{id}")
     public ResponseEntity<Object> patchTaskID(@PathVariable int id, @RequestBody TaskDto task) {
@@ -82,10 +82,7 @@ public class TaskControllers {
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> deleteTaskID(@PathVariable int id){
-        boolean deleted = taskService.deleteTask(id);
-        if(deleted){
-            return ResponseEntity.status(204).build();
-        }
-        return ResponseEntity.status(404).body("No se ha encontrado una tarea con id: " + id);
+        taskService.deleteTask(id);
+        return ResponseEntity.status(204).build();
     }
 }
