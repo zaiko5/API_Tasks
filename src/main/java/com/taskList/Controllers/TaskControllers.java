@@ -9,41 +9,63 @@ import com.taskList.Services.TaskService;
 
 import java.util.List;
 
+//Clase controladora que interactua con el front.
 @RestController
 @RequestMapping("/tasks")
 public class TaskControllers {
 
-    @Autowired
+    //En el servicio se inyecta el repositorio para hacer queries desde ahi, en el controlador se inyecta el servicio para llamar a las funciones directamente desde el controlador.
+    @Autowired //Inyectando dependencias (el servicio task para tener sus funciones)
     @Lazy
     private TaskService taskService;
 
+    /**
+     * Peticion get para obtener todas las tareas de la BBDD.
+     * @return Un mensaje RE dependiendo de si se retorna algo o no.
+     */
     @GetMapping
     public ResponseEntity<Object> getTasks() {
-        List<TaskDto> tasks = taskService.getTasks();
-        if (tasks.isEmpty()) {
+        List<TaskDto> tasks = taskService.getTasks(); //Obteniendo las listas de tareas desde el servicio.
+        if (tasks.isEmpty()) { //Si esta vacia la lista se manda el codigo 404.
             return ResponseEntity.status(404).body("No hay tareas para mostrar");
-        }
+        } //Si no, se manda el codigo 200
         return ResponseEntity.ok(tasks);
     }
 
+    /**
+     * Peticion get para obtener una tarea por id
+     * @param id pasado por path
+     * @return un codigo de estado dependiendo de si se encontro la tarea o no
+     */
     @GetMapping("/{id}")
     public ResponseEntity<Object> getTaskID(@PathVariable int id) {
-        TaskDto task = (TaskDto) taskService.getTaskID(id);
-        if(task == null){
+        TaskDto task = taskService.getTaskID(id); //Obtenemos la tarea desde el servicio
+        if(task == null){ //Si no existe la tarea
             return ResponseEntity.status(404).body("No se ha encontrado la tarea con id: " + id);
         }
         return ResponseEntity.ok(task);
     }
 
+    /**
+     * Peticion post para agregar una nueva tarea
+     * @param task pasado por JSON
+     * @return un codigo de estado dependiendo de si se pudo agregar la tarea o no
+     */
     @PostMapping
     public ResponseEntity<Object> postTask(@RequestBody TaskDto task){
-        TaskDto newTask = (TaskDto) taskService.postTask(task);
+        TaskDto newTask = taskService.postTask(task);
         if(newTask == null){
             return ResponseEntity.status(400).body("Campos faltantes para el objeto: " + task);
         }
         return ResponseEntity.status(201).body(newTask);
     }
 
+    /**
+     * Peticion put para modificar los detalles de una tarea totalmente
+     * @param id pasado por path
+     * @param task pasado por JSON
+     * @return Un mensaje de estado dependiendo de si se encontro la tarea o no.
+     */
     @PutMapping("/{id}")
     public ResponseEntity<Object> putTaskID(@PathVariable int id, @RequestBody TaskDto task) {
         TaskDto taskDto = taskService.putTask(task, id);
@@ -54,6 +76,12 @@ public class TaskControllers {
         return ResponseEntity.ok(taskDto);
     }
 
+    /**
+     * Peticion patch para modificar una tarea parcialmente
+     * @param id pasado por path
+     * @param task pasado por JSON
+     * @return un codigo de estado
+     */
     @PatchMapping("/{id}")
     public ResponseEntity<Object> patchTaskID(@PathVariable int id, @RequestBody TaskDto task) {
         TaskDto newTask = taskService.patchTask(task, id);
@@ -63,6 +91,11 @@ public class TaskControllers {
         return ResponseEntity.ok().body(newTask);
     }
 
+    /**
+     * Peticion delete para eliminar una tarea
+     * @param id pasado por path
+     * @return Un codigo de estado.
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> deleteTaskID(@PathVariable int id){
         boolean deleted = taskService.deleteTask(id);

@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TaskDto {
+    //Debe tener los mismos atributos o menos que la clase entidad.
     private int id;
     private String petition;
     private String status;
