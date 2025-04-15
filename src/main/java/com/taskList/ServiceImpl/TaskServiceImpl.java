@@ -110,8 +110,11 @@ public class TaskServiceImpl implements TaskService {
 
                 return TaskMapper.toDTO(updatedTask); //Retornamos la tarea actualizada transformada a DTO
             }
-        }
-        return null;
+            else{ //Si al encontrar por id el optional lanza false, se llama a la excepcion del tipo TareaNoEncontrada.
+                throw new TareaNoEncontradaException(id);
+            }
+        }//Si alguno de los campos es nulo se llama a la excepcion del tipo camposFaltantes
+        throw new CamposFaltantesException();
     }
 
     /**

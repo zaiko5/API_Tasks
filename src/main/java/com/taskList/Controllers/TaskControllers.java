@@ -55,15 +55,11 @@ public class TaskControllers {
      * Peticion put para modificar los detalles de una tarea totalmente
      * @param id pasado por path
      * @param task pasado por JSON
-     * @return Un mensaje de estado dependiendo de si se encontro la tarea o no.
+     * @return Un mensaje de estado 200, la excepcion se maneja en el servicio con el handler en cuanto se lance.
      */
     @PutMapping("/{id}")
     public ResponseEntity<Object> putTaskID(@PathVariable int id, @RequestBody TaskDto task) {
         TaskDto taskDto = taskService.putTask(task, id);
-
-        if(taskDto == null){
-            return ResponseEntity.status(404).body("No se ha encontrado una tarea con id: " + id);
-        }
         return ResponseEntity.ok(taskDto);
     }
 
