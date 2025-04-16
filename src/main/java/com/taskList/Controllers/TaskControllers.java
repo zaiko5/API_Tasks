@@ -1,15 +1,14 @@
 package com.taskList.Controllers;
-
 import com.taskList.DTOs.TaskDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.context.annotation.Lazy;
 import com.taskList.Services.TaskService;
-
 import java.util.List;
 
 //Clase controladora que interactua con el front.
+//En este caso no se usa la anotacion @Valid, ya que ya se validan los campos de entrada de los DTO en excepciones personalizadas.
 @RestController
 @RequestMapping("/tasks")
 public class TaskControllers {
