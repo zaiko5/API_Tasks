@@ -11,12 +11,13 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.scheduling.config.Task;
 
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class TaskServiceImplTest {
 
@@ -156,10 +157,80 @@ class TaskServiceImplTest {
 
     @Test
     void patchTask() {
-        
+        //Arrange
+        TaskDto dtoEntrada = new TaskDto(1, null, "In Progress");  // DTO que vamos a actualizar
+        TaskEntity tareaExistente = new TaskEntity(1, "Estudiar Java", "To Do");  // La tarea que ya existe en la base de datos
+        TaskEntity tareaActualizada = new TaskEntity(1, "Estudiar Java", "In Progress");  // La tarea con los nuevos datos
+        TaskDto dtoEsperado = new TaskDto(1, "Estudiar Java", "In Progress");  // El DTO que esperamos como resultado
+
+        TaskDto dtoEntrada2 = new TaskDto(2, "Hacer algo mas", null);  // DTO que vamos a actualizar
+        TaskEntity tareaExistente2 = new TaskEntity(2, "Estudiar Java", "To Do");  // La tarea que ya existe en la base de datos
+        TaskEntity tareaActualizada2 = new TaskEntity(2, "Hacer algo mas", "To Do");  // La tarea con los nuevos datos
+        TaskDto dtoEsperado2 = new TaskDto(2, "Hacer algo mas", "To Do");  // El DTO que esperamos como resultado
+
+        when(taskRepository.findById((long) 1)).thenReturn(Optional.of(tareaExistente));
+        when(taskRepository.save(tareaExistente)).thenReturn(tareaActualizada);
+
+        when(taskRepository.findById((long) 2)).thenReturn(Optional.of(tareaExistente2));
+        when(taskRepository.save(tareaExistente2)).thenReturn(tareaActualizada2);
+
+        TaskDto resultado = taskService.patchTask(dtoEntrada, 1);
+        TaskDto resultado2 = taskService.patchTask(dtoEntrada2, 2);
+
+        //Asserts
+        assertNotNull(resultado);  // El resultado no debe ser nulo
+        assertEquals(resultado.getId(), dtoEntrada.getId());
+        assertEquals(resultado.getStatus(), dtoEntrada.getStatus());
+        assertNotEquals(resultado.getPetition(),dtoEntrada.getPetition());
+        assertEquals(resultado.getPetition(), tareaExistente.getPetition());
+
+        assertEquals(resultado2.getId(), dtoEntrada2.getId());
+        assertNotEquals(resultado2.getStatus(), dtoEntrada2.getStatus());
+        assertEquals(resultado2.getPetition(),dtoEntrada2.getPetition());
+        assertEquals(resultado2.getPetition(), tareaExistente2.getPetition());
+    }
+
+    @Test
+    void patchTask_throwException(){
+        TaskDto dtoEntrada = new TaskDto(1, null, "In Progress");  // DTO que vamos a actualizar
+
+        when(taskRepository.findById((long) 1)).thenReturn(Optional.empty());
+
+        assertThrows(TareaNoEncontradaException.class, () -> taskService.patchTask(dtoEntrada, 1));
+    }
+
+    @Test
+    void patchTask_noChangesIfAllFieldsAreNullOrEmpty() {
+        TaskDto dtoEntrada = new TaskDto(1, "", null);  // Todos vacíos
+        TaskEntity tareaExistente = new TaskEntity(1, "Estudiar Java", "To Do");
+
+        when(taskRepository.findById((long) 1)).thenReturn(Optional.of(tareaExistente));
+        when(taskRepository.save(tareaExistente)).thenReturn(tareaExistente);
+
+        TaskDto resultado = taskService.patchTask(dtoEntrada, 1);
+
+        assertEquals("Estudiar Java", resultado.getPetition());
+        assertEquals("To Do", resultado.getStatus());
     }
 
     @Test
     void deleteTask() {
+        int id = 1;
+
+        when(taskRepository.existsById((long) id)).thenReturn(true);
+        doNothing().when(taskRepository).deleteById((long) id);
+
+        taskService.deleteTask(id);
+        verify(taskRepository).deleteById((long) id); //Verifica que se llamó al método
+    }
+
+    @Test
+    void deleteTask_ThrowException() {
+        int id = 1;
+
+        when(taskRepository.existsById((long) id)).thenReturn(false);
+
+        assertThrows(TareaNoEncontradaException.class, () -> taskService.deleteTask(id));
+        verify(taskRepository, never()).deleteById(anyLong());
     }
 }
