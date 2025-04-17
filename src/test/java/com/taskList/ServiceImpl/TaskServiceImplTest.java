@@ -60,7 +60,7 @@ class TaskServiceImplTest {
         assertEquals("Tarea 2", resultado.get(1).getPetition()); //El titulo de el elemento 2 deberia ser "Tarea 2" EN ESTE CASO ESPECÏFICO.
     }
 
-    //Test para el caso de la excepcion.
+    //Caso 2: Excepcion, no hay nada en la lista.
     @Test
     void getTasks_throwException(){
         //ARRANGE
@@ -76,181 +76,247 @@ class TaskServiceImplTest {
     }
 
     /**
-     * 
+     * Testeos al servicio getTaskID
      */
+    //Caso 1: Retorno de objeto exitoso, si hay usuario con x id.
     @Test
     void getTaskID() {
-        //Datos de entrada.
+        //ARRANGE
+        //Solo necesitamos una tarea valida que es la que se va a retornar
         TaskEntity tareaMockeada = new TaskEntity(1, "Tarea 1", "To do");
 
+        //Definiendo lo que se debe de retornar cuando se llame a la funcion del repositorio (en este caso, la tarea valida"
         when(taskRepository.findById((long) tareaMockeada.getId())).thenReturn(Optional.of(tareaMockeada));
 
+        //ACT
+        //Generando el resultado llamando a la funcion para comparar.
         TaskDto resultado = taskService.getTaskID(tareaMockeada.getId());
 
-        assertNotNull(resultado);
-        assertEquals("Tarea 1", resultado.getPetition());
+        //ASSERT
+        //Validaciones del resultado, lo que deberia pasar en este caso
+        assertNotNull(resultado); //El resultado no debe de ser nulo
+        assertEquals("Tarea 1", resultado.getPetition()); //El titulo de la tarea deberia de ser tarea 1.
     }
 
+    //Caso 2: No se encuentra el id (HAY EXCEPCION)
     @Test
     void getTaskID_throwException() {
-        // Datos de entrada.
+        // ARRANGE
         int tareaId = 999; // ID de tarea que no existe.
 
-        // Simulando que no se encuentra la tarea.
+        //Definiendo que es lo que se deberia de retornar en este caso específico (un Optional.empty, la funcion findById siempre retorna un optional)
         when(taskRepository.findById((long) tareaId)).thenReturn(Optional.empty());
 
-        // Verificando que se lance la excepción.
+        //ACT + ASSERT
+        //Verificando que  lanza la excepcion del tipo tareaNoEncontrada cuando se llame a la funcion getTaskId con este id.
         assertThrows(TareaNoEncontradaException.class, () -> taskService.getTaskID(tareaId));
     }
 
+    /**
+     * Testeo del servicio postTask
+     */
+    //Caso 1: Ingreso de tarea correcto y un save correcto en la base de datos.
     @Test
     void postTask() {
         //Arrange
-        TaskDto dtoEntrada = new TaskDto(0,"Estudiar Spring", "To do"); //Ejecucion metodo
-        TaskEntity entidadEntrada = new TaskEntity(0, "Estudiar Spring", "To do"); //Para la comparacion
-        TaskEntity entidadGuardada = new TaskEntity(1, "Estudiar Spring", "To do"); //Retorno en la comparacion
-        TaskDto dtoEsperado = new TaskDto(1, "Estudiar Spring", "To do"); //Para la comparacion de asserts.
+        TaskDto dtoEntrada = new TaskDto(0,"Estudiar Spring", "To do"); //DTO de entrada que es el que el usuario deberia de ingresar
+        TaskEntity entidadEntrada = new TaskEntity(0, "Estudiar Spring", "To do"); //Entidad de entrada que es el mismo DTO del usuario pero convertido a entidad.
+        TaskEntity entidadGuardada = new TaskEntity(1, "Estudiar Spring", "To do"); //Entidad de salida que es la misma entidad pero ahora con ID
+        TaskDto dtoEsperado = new TaskDto(1, "Estudiar Spring", "To do"); //DTO de salida que es la misma entidad de salida..
 
-        //Definiendo que es lo que debe retornar el metodo con un valor x.
+        //Definiendo que es lo que debe retornar la llamada al metodo JPA (save) con el mismo objeto que se usa de parametro en su llamada desde la clase de servicio, en este caso, debe de retornar la entidadGuardada.
         when(taskRepository.save(entidadEntrada)).thenReturn(entidadGuardada);
 
-        //Act
-        TaskDto resultado = taskService.postTask(dtoEntrada); //Llamando a la funcion para obtener el resultado
+        //ACT
+        //Obteniendo el resultado de la funcion con el dtoEntrada, que es lo que se pide en el metodo original de parametro.
+        TaskDto resultado = taskService.postTask(dtoEntrada);
 
-        //Assert
+        //ASSERT
         assertEquals(dtoEsperado.getId(), resultado.getId()); //Definiendo que el id del dtoEsperado debe ser igual al del resultado.
-        assertEquals(dtoEsperado.getPetition(), resultado.getPetition());
-        assertEquals(dtoEsperado.getStatus(), resultado.getStatus());
-        assertNotNull(resultado);
+        assertEquals(dtoEsperado.getPetition(), resultado.getPetition()); //La peticion del DTO esperado debe ser la misma que la del resultado
+        assertEquals(dtoEsperado.getStatus(), resultado.getStatus()); //El status del dto esperado debe ser el mismo que el de la llamada a la funcion.
+        assertNotNull(resultado); //El resultado de la funcion no debe ser nulo
     }
 
+    //Caso 2: Se ingresa uno de los datos en null o vacios y da excepcion.
     @Test
     void postTask_throwException(){
-        //Arrange
-        TaskDto dtoEntrada = new TaskDto(0,"", "null");
+        //ARRANGE
+        TaskDto dtoEntrada = new TaskDto(0,"", null); //Solo necesitamos el objeto de entrada con datos vacios o nulos.
 
-        // Act + Assert
+        //ACT + ASSERT
+        //Al no haber llamado a una funcion JPA antes de la validacion la cual no pasó nuestro objeto, no se usa el when...thenReturn..., y se pasa directo a definir que se debio haber tirado una excepcion al haber llamado al metodo con el dtoEntrada.
         assertThrows(CamposFaltantesException.class, () -> taskService.postTask(dtoEntrada));
     }
 
+    /**
+     * Testeo de la funcion putTask
+     */
+    //Caso 1: Se recibe un objeto con los campos correctos, existente en la DB y no lanza excepciones.
     @Test
     void putTask() {
-        //Arrange
-        TaskDto dtoEntrada = new TaskDto(1, "Estudiar Spring", "In Progress");  // DTO que vamos a actualizar
-        TaskEntity tareaExistente = new TaskEntity(1, "Estudiar Java", "To Do");  // La tarea que ya existe en la base de datos
-        TaskEntity tareaActualizada = new TaskEntity(1, "Estudiar Spring", "In Progress");  // La tarea con los nuevos datos
-        TaskDto dtoEsperado = new TaskDto(1, "Estudiar Spring", "In Progress");  // El DTO que esperamos como resultado
+        //ARRANGE
+        TaskDto dtoEntrada = new TaskDto(1, "Estudiar Spring", "In Progress");  //DTO de entrada.
+        TaskEntity tareaExistente = new TaskEntity(1, "Estudiar Java", "To Do");  //Entidad que debera de retornar el metodo find ya existente en la DDBB.
+        TaskEntity tareaActualizada = new TaskEntity(1, "Estudiar Spring", "In Progress");  //La entidad con los datos actualizados.
+        TaskDto dtoEsperado = new TaskDto(1, "Estudiar Spring", "In Progress");  //El DTO que deberia de regresarse al controlador.
 
-        // Configurar el repositorio mockeado
+        //Definiendo que deberia retornar en este caso cada uno de los llamados a la BD JPA
+        //En findById con el id de la tarea de tarea digitada, deberia de retornar la entidad existente en la DB.
         when(taskRepository.findById((long) 1)).thenReturn(Optional.of(tareaExistente));
+        //Cuando se guarda la tarea existente, que es a la que se le hacen los cambios, deberia de retornar la entidad actualizada, que deberia de ser igual al DTO de entrada.
         when(taskRepository.save(tareaExistente)).thenReturn(tareaActualizada);
 
-        TaskDto resultado = taskService.putTask(dtoEntrada, 1); //Llamando al metodo (Act)
+        //ACT
+        //Obteniendo el resultado llamando al servicio.
+        TaskDto resultado = taskService.putTask(dtoEntrada, 1);
 
-        // Assert
+        //ASSERT
         assertNotNull(resultado);  // El resultado no debe ser nulo
         assertEquals(dtoEsperado.getId(), resultado.getId());  // Verifica que el id sea el mismo
         assertEquals(dtoEsperado.getPetition(), resultado.getPetition());  // Verifica que el campo petition sea el mismo
         assertEquals(dtoEsperado.getStatus(), resultado.getStatus());  // Verifica que el campo status sea el mismo
     }
 
+    //Caso 2: Alguno de los campos es vacios o nulos y tiran una excepcion.
     @Test
     void putTask_throwExceptionNullField(){
-        TaskDto dtoEntrada = new TaskDto(1, "", null);  // DTO que vamos a actualizar
-        TaskEntity tareaExistente = new TaskEntity(1, "Estudiar Java", "To Do");  // La tarea que ya existe en la base de datos
+        //ARRANGE
+        TaskDto dtoEntrada = new TaskDto(1, "", null);  //DTO de entrada (unico a usar ya que hasta ahi llega la logica antes de la primera validacion.
 
-        //Haciendo act + assert ya que la condicion no da chance a que el repositorio haga un llamado, si no que manda directo a la excepcion
+        //ACT + ASSERT
+        //Verificando que se lance la excepcion campos faltantes enseguida que se llame a la funcion
         assertThrows(CamposFaltantesException.class, () -> taskService.putTask(dtoEntrada, 1));
     }
 
+    //Caso 3: Los campos son correctos pero el id no se encuentra entonces lanza una excepcion.
     @Test
     void putTask_throwExceptionTaskNotFind(){
-        TaskDto dtoEntrada = new TaskDto(1, "Estudiar Spring", "In Progress");  // DTO que vamos a actualizar
+        //ARRANGE
+        TaskDto dtoEntrada = new TaskDto(1, "Estudiar Spring", "In Progress");  //DTO de entrada.
 
-        //Definiendo que cuando se haga la busqueda del id y sea vacio pasará lo siguiente
+        //Definiendo que es lo que deberia de retornar la llamada a la funcion findById con x id, en este caso, suponiendo que la tarea no se encuentra, haremos que lance la un optional empty.
         when(taskRepository.findById((long) 1)).thenReturn(Optional.empty());
 
-        // Act + Assert
-        //Se lanzará una excepcion del tipo tara no encontrada llamando a la funcion testeada.
+        //ACT + ASSERT
+        //Verificando que se lanza la excepcion tarea no encontrada cuando se llama a la funcion putTask.
         assertThrows(TareaNoEncontradaException.class, () -> taskService.putTask(dtoEntrada, 1));
     }
 
+    /**
+     * Testeo de la funcion pathTask.
+     */
+    //Caso 1 y 1.1: Se mandan tareas incompletas pero con id correcto, entonces no se lanza una excepcion.
     @Test
     void patchTask() {
         //Arrange
-        TaskDto dtoEntrada = new TaskDto(1, null, "In Progress");  // DTO que vamos a actualizar
-        TaskEntity tareaExistente = new TaskEntity(1, "Estudiar Java", "To Do");  // La tarea que ya existe en la base de datos
-        TaskEntity tareaActualizada = new TaskEntity(1, "Estudiar Java", "In Progress");  // La tarea con los nuevos datos
-        TaskDto dtoEsperado = new TaskDto(1, "Estudiar Java", "In Progress");  // El DTO que esperamos como resultado
+        //Caso 1: Peticion null pero status correcto
+        TaskDto dtoEntrada = new TaskDto(1, null, "In Progress");  // DTO de entrada
+        TaskEntity tareaExistente = new TaskEntity(1, "Estudiar Java", "To Do");  //Entidad ya registrada en la BD
+        TaskEntity tareaActualizada = new TaskEntity(1, "Estudiar Java", "In Progress");  //Entidad actualizada y registrada en la DB
+        TaskDto dtoEsperado = new TaskDto(1, "Estudiar Java", "In Progress");  //DTO de salida
 
-        TaskDto dtoEntrada2 = new TaskDto(2, "Hacer algo mas", null);  // DTO que vamos a actualizar
-        TaskEntity tareaExistente2 = new TaskEntity(2, "Estudiar Java", "To Do");  // La tarea que ya existe en la base de datos
-        TaskEntity tareaActualizada2 = new TaskEntity(2, "Hacer algo mas", "To Do");  // La tarea con los nuevos datos
-        TaskDto dtoEsperado2 = new TaskDto(2, "Hacer algo mas", "To Do");  // El DTO que esperamos como resultado
+        //Caso 1.1: peticion correcta pero status null.
+        TaskDto dtoEntrada2 = new TaskDto(2, "Hacer algo mas", null);  //DTO de entrada
+        TaskEntity tareaExistente2 = new TaskEntity(2, "Estudiar Java", "To Do");  //Entidad existente en la BD
+        TaskEntity tareaActualizada2 = new TaskEntity(2, "Hacer algo mas", "To Do");  //Entidad actualizada y registrada en la BD.
+        TaskDto dtoEsperado2 = new TaskDto(2, "Hacer algo mas", "To Do");  //DTO de salida.
 
+        //Caso 1. Definiendo lo que deberia de retornar las funciones de JPA para la tarea 1
         when(taskRepository.findById((long) 1)).thenReturn(Optional.of(tareaExistente));
         when(taskRepository.save(tareaExistente)).thenReturn(tareaActualizada);
 
+        //Caso 1.1: Definiendo lo que deberia de retornar las funciones deJPa para la tarea 1.1
         when(taskRepository.findById((long) 2)).thenReturn(Optional.of(tareaExistente2));
         when(taskRepository.save(tareaExistente2)).thenReturn(tareaActualizada2);
 
-        TaskDto resultado = taskService.patchTask(dtoEntrada, 1);
-        TaskDto resultado2 = taskService.patchTask(dtoEntrada2, 2);
+        //ACT
+        TaskDto resultado = taskService.patchTask(dtoEntrada, 1); //Resultado 1
+        TaskDto resultado2 = taskService.patchTask(dtoEntrada2, 2); //Resultado 1.1
 
-        //Asserts
-        assertNotNull(resultado);  // El resultado no debe ser nulo
+        //Asserts caso 1
+        assertNotNull(resultado);
         assertEquals(resultado.getId(), dtoEntrada.getId());
         assertEquals(resultado.getStatus(), dtoEntrada.getStatus());
         assertNotEquals(resultado.getPetition(),dtoEntrada.getPetition());
         assertEquals(resultado.getPetition(), tareaExistente.getPetition());
 
+        //ASSERTS caso 1.1
         assertEquals(resultado2.getId(), dtoEntrada2.getId());
         assertNotEquals(resultado2.getStatus(), dtoEntrada2.getStatus());
         assertEquals(resultado2.getPetition(),dtoEntrada2.getPetition());
         assertEquals(resultado2.getPetition(), tareaExistente2.getPetition());
     }
 
+    //Caso 2: El id es incorrecto y se lanza una excepcion
     @Test
     void patchTask_throwException(){
-        TaskDto dtoEntrada = new TaskDto(1, null, "In Progress");  // DTO que vamos a actualizar
+        //ARRANGE
+        TaskDto dtoEntrada = new TaskDto(1, null, "In Progress");  //DTO de entrada
 
+        //Al haber un llamado a la funcion de JPA findById antes de la verificacion del id en el servicio, se define que es lo que deberia de regresar en este caso, deberia ser un optional.empty
         when(taskRepository.findById((long) 1)).thenReturn(Optional.empty());
 
+        //ASSERT + ACT
+        //Verificando que se debe de lanzar una excepcion despues de llamar a la funcion JPA, habiendo llamado al servicio Patch con id incorrecto.
         assertThrows(TareaNoEncontradaException.class, () -> taskService.patchTask(dtoEntrada, 1));
     }
 
+    //Caso 3: id correcto pero ambos campos nulos (segunda y tercera verificacion) (no lanza excepcion)
     @Test
     void patchTask_noChangesIfAllFieldsAreNullOrEmpty() {
-        TaskDto dtoEntrada = new TaskDto(1, "", null);  // Todos vacíos
-        TaskEntity tareaExistente = new TaskEntity(1, "Estudiar Java", "To Do");
+        TaskDto dtoEntrada = new TaskDto(1, "", null);  //DTO de entrada
+        TaskEntity tareaExistente = new TaskEntity(1, "Estudiar Java", "To Do"); //Entidad encontrada en la BD
 
+        //Definiendo que es lo que se debe de retornar en ambas llamadas al JPa, en el primer caso al si existir la tarea con el id ingresado deberia de retornar la tarea existente.
         when(taskRepository.findById((long) 1)).thenReturn(Optional.of(tareaExistente));
+        //En la segunda llamada con save, deberia retornar la msima tarea existente,ya que no hay cambios para modificar.
         when(taskRepository.save(tareaExistente)).thenReturn(tareaExistente);
 
+        //ACT
+        //Obteniendo el resultado de llamar a patchTask con la tarea vacia.
         TaskDto resultado = taskService.patchTask(dtoEntrada, 1);
 
-        assertEquals("Estudiar Java", resultado.getPetition());
-        assertEquals("To Do", resultado.getStatus());
+        //ASSERT
+        assertEquals("Estudiar Java", resultado.getPetition()); //El titulo del resultado deberia ser el mismo de la entidad existente
+        assertEquals("To Do", resultado.getStatus()); //El estado del resultado deberia ser el mismo de la entidad existente.
+        assertNotNull(resultado); //El resultado no deberia de ser null
     }
 
+    /**
+     * Testeo de la funcion deleteTask
+     */
+    //Caso 1: El delete sale bien, la tarea pasada existe y no hay excepciones.
     @Test
     void deleteTask() {
-        int id = 1;
+        //ASSERT.
+        int id = 1; //Solo ocupamos el id de entrada
 
+        //Definir que es lo que se va a retornar cuando se llame a la funcion existsById con el id pasado, en este caso debe ser un true de que si existe.
         when(taskRepository.existsById((long) id)).thenReturn(true);
+        //Definir que es lo que debe de pasar cuando se llame a la funcion deleteById con el id pasado, sera un doNothing ya que solo se debe de eliminar.
         doNothing().when(taskRepository).deleteById((long) id);
 
+        //ACT
+        //Llamamos a la funcion deleteTask del servicio con el id
         taskService.deleteTask(id);
-        verify(taskRepository).deleteById((long) id); //Verifica que se llamó al método
+
+        //ASSERT
+        //Al no retornar nada, solo se vericia que se haya llamado al metodo deltebyId.
+        verify(taskRepository).deleteById((long) id);
     }
 
+    //Caso 2: el id no existe y lanza una excepcion del tipo tarea no encontrada
     @Test
     void deleteTask_ThrowException() {
-        int id = 1;
+        //ARRANGE
+        int id = 1; //Solo se necesita un id de entrada.
 
+        //Definir que es lo que se va a retornar cuando se llame a la funcion existsById con el id pasado, y en este caso sera false simulando que la tarea no se encontro.
         when(taskRepository.existsById((long) id)).thenReturn(false);
 
-        assertThrows(TareaNoEncontradaException.class, () -> taskService.deleteTask(id));
-        verify(taskRepository, never()).deleteById(anyLong());
+        //ACT + ASSERT
+        assertThrows(TareaNoEncontradaException.class, () -> taskService.deleteTask(id)); //Verificar que se lanza la excepcion cuando se llama al metodo.
+        verify(taskRepository, never()).deleteById(anyLong()); //Verificar que el repositorio nunca llamó al metodo deleteById.
     }
 }

@@ -98,17 +98,17 @@ public class TaskServiceImpl implements TaskService {
             //Encontramos la tarea a modificar por el id, creada en un Optional ya que viene de findById y si existe...
             Optional<TaskEntity> taskOptional = taskRepository.findById((long) id);
             if (taskOptional.isPresent()) {
-                //Pasamos la tarea de tipo Optional a una entidad con el metodo get, teniendo en cuenta que en la task optional ya tenemos el id.
-                TaskEntity existingTask = taskOptional.get();
+                    //Pasamos la tarea de tipo Optional a una entidad con el metodo get, teniendo en cuenta que en la task optional ya tenemos el id.
+                    TaskEntity existingTask = taskOptional.get();
 
-                // Actualizar los campos en la tarea entidad desde los campos del dto.
-                existingTask.setPetition(task.getPetition());
-                existingTask.setStatus(task.getStatus());
+                    // Actualizar los campos en la tarea entidad desde los campos del dto.
+                    existingTask.setPetition(task.getPetition());
+                    existingTask.setStatus(task.getStatus());
 
-                // Guardar los cambios
-                TaskEntity updatedTask = taskRepository.save(existingTask);
+                    // Guardar los cambios
+                    TaskEntity updatedTask = taskRepository.save(existingTask);
 
-                return TaskMapper.toDTO(updatedTask); //Retornamos la tarea actualizada transformada a DTO
+                    return TaskMapper.toDTO(updatedTask); //Retornamos la tarea actualizada transformada a DTO
             }
             else{ //Si al encontrar por id el optional lanza false, se llama a la excepcion del tipo TareaNoEncontrada.
                 throw new TareaNoEncontradaException(id);
