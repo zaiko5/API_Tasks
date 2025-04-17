@@ -114,10 +114,49 @@ class TaskServiceImplTest {
 
     @Test
     void putTask() {
+        //Arrange
+        TaskDto dtoEntrada = new TaskDto(1, "Estudiar Spring", "In Progress");  // DTO que vamos a actualizar
+        TaskEntity tareaExistente = new TaskEntity(1, "Estudiar Java", "To Do");  // La tarea que ya existe en la base de datos
+        TaskEntity tareaActualizada = new TaskEntity(1, "Estudiar Spring", "In Progress");  // La tarea con los nuevos datos
+        TaskDto dtoEsperado = new TaskDto(1, "Estudiar Spring", "In Progress");  // El DTO que esperamos como resultado
+
+        // Configurar el repositorio mockeado
+        when(taskRepository.findById((long) 1)).thenReturn(Optional.of(tareaExistente));
+        when(taskRepository.save(tareaExistente)).thenReturn(tareaActualizada);
+
+        TaskDto resultado = taskService.putTask(dtoEntrada, 1); //Llamando al metodo (Act)
+
+        // Assert
+        assertNotNull(resultado);  // El resultado no debe ser nulo
+        assertEquals(dtoEsperado.getId(), resultado.getId());  // Verifica que el id sea el mismo
+        assertEquals(dtoEsperado.getPetition(), resultado.getPetition());  // Verifica que el campo petition sea el mismo
+        assertEquals(dtoEsperado.getStatus(), resultado.getStatus());  // Verifica que el campo status sea el mismo
+    }
+
+    @Test
+    void putTask_throwExceptionNullField(){
+        TaskDto dtoEntrada = new TaskDto(1, "", null);  // DTO que vamos a actualizar
+        TaskEntity tareaExistente = new TaskEntity(1, "Estudiar Java", "To Do");  // La tarea que ya existe en la base de datos
+
+        //Haciendo act + assert ya que la condicion no da chance a que el repositorio haga un llamado, si no que manda directo a la excepcion
+        assertThrows(CamposFaltantesException.class, () -> taskService.putTask(dtoEntrada, 1));
+    }
+
+    @Test
+    void putTask_throwExceptionTaskNotFind(){
+        TaskDto dtoEntrada = new TaskDto(1, "Estudiar Spring", "In Progress");  // DTO que vamos a actualizar
+
+        //Definiendo que cuando se haga la busqueda del id y sea vacio pasará lo siguiente
+        when(taskRepository.findById((long) 1)).thenReturn(Optional.empty());
+
+        // Act + Assert
+        //Se lanzará una excepcion del tipo tara no encontrada llamando a la funcion testeada.
+        assertThrows(TareaNoEncontradaException.class, () -> taskService.putTask(dtoEntrada, 1));
     }
 
     @Test
     void patchTask() {
+        
     }
 
     @Test
