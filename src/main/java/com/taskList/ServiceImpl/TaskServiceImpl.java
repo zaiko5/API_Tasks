@@ -167,11 +167,4 @@ public class TaskServiceImpl implements TaskService {
         //Si no se entra al if, se lanza una excepcion de tarea no encontrada, manejable desde el Handler.
         throw new TareaNoEncontradaException(id);
     }
-    
-    public List<TaskDto> getTasksByStatus(String status) {
-        List<TaskEntity> entities = taskRepository.findByStatus(status);
-        return entities.stream()
-                .map(t -> new TaskDto(t.getId().intValue(), t.getPetition(), t.getStatus()))
-                .collect(Collectors.toList());
-    }
 }
