@@ -22,40 +22,56 @@ import static org.mockito.Mockito.*;
 class TaskServiceImplTest {
 //Falta agregar comentarios y aparte agregar algunas notas en notion
 
-    @Mock //Simulando la base de datos.
+    @Mock //Simulando la base de datos y agregando las dependencias del servicio a testear (las mismas).
     TaskRepository taskRepository;
 
-    @InjectMocks //Inyectando el servicio a testear.
+    @InjectMocks //Inyectando el servicio a testear (en este caso se están testeando las funciones de la clase de servicio).
     TaskServiceImpl taskService;
 
-    @BeforeEach
+    @BeforeEach //Inicializando los mocks con beforeEach y una funcion setUp.
     void setUp() {
         MockitoAnnotations.openMocks(this);
     }
 
+    /**
+     * Testeo al servicio getTasks.
+     */
+    //Caso 1: Retorno de datos exitosos.
     @Test
     void getTasks() {
-        //Datos de entrada
+        //ARRANGE
+        //Datos de entrada, una lista de tareas la cual se va a retornar.
         List<TaskEntity> tareasMockeadas = List.of(
                 new TaskEntity(1, "Tarea 1", "Done"),
                 new TaskEntity(2, "Tarea 2", "To do")
         );
+
+        //Definiendo que es lo que se debe de retornar cuando se llame a la funcion de la base de datos, en este caso, findAll, esto se debe de hacer con cada funcion de JPA que haya en el metodo, cuando se llame a la funcion, se tiene que retornar la lista que ya existe.
         when(taskRepository.findAll()).thenReturn(tareasMockeadas);
 
+        //ACT
+        //Llamando a la funcion, el paso de Act y Assert se hace separado cuando no hay excepcion, el resultado debe ser el llamado a la funcion que se está inyectando, en este caso, la del servicio.
         List<TaskDto> resultado = taskService.getTasks();
 
-        assertNotNull(resultado);
-        assertEquals(2, resultado.size());
-        assertEquals("Tarea 2", resultado.get(1).getPetition());
+        //ASSERT
+        //Verificando que todo salga bien con el resultado.
+        assertNotNull(resultado); //El resultado no deberia ser null
+        assertEquals(2, resultado.size()); //El tamaño de la lista deberia de ser 2 (en este caso específico)
+        assertEquals("Tarea 2", resultado.get(1).getPetition()); //El titulo de el elemento 2 deberia ser "Tarea 2" EN ESTE CASO ESPECÏFICO.
     }
 
+    //Test para el caso de la excepcion.
     @Test
     void getTasks_throwException(){
-        //Datos de entrada
+        //ARRANGE
+        //En este caso necesitamos una lista vacia para provocar la excepcion.
         List<TaskEntity> tareasMockeadas = List.of(); //Lista vacía (no hay tareas)
 
+        //Esto es parte del arrange aun, usamos este when ya que sí o sí se va a ejecutar el findAll, no hay una condicion antes de el llamado al metodo findAll que haga que no se ejecute, cuando se llame al metodo deberia de retornar la lista, haya tareas o no.
         when(taskRepository.findAll()).thenReturn(tareasMockeadas);
 
+        //ACT + ASSERT
+        //Teniendo en cuenta que despues del llamado hay una condicion que dice que la lista no deberia de estar vacía, pues no se cumple la condicion y se salta directamente a la excepcion, verificamos que se lanza una excepcion del tipo ListaVaciaException al llamar a la funcion taskService.getTask.
         assertThrows(ListaVaciaException.class, () -> taskService.getTasks());
     }
 
