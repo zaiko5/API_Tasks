@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.Map;
 
+//Falta agregar test para esta clase que es cuando se retorna los codigos de estado, para cuando se lanzan las excepciones ya hay test (que solo son los metodos constructores de la excepcion).
 @RestControllerAdvice //Definiendo que sera una clase contenedora de handlers para manejar excepciones.
 public class GlobalExceptionHandler {
 
