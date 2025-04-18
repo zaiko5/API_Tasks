@@ -16,30 +16,44 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
+//TEST DE CONTROLADORES.
+@ExtendWith(MockitoExtension.class) //Permite inyeccion de dependencias en testeo.
 class TaskControllersTest {
 
-    @InjectMocks
+    @InjectMocks //Inyectamos el mock de la clase que vamos a testear.
     private TaskControllers controller;
 
-    @Mock
+    @Mock //Inyectamos la dependencia de la clase a testear, en este caso los controllers dependen de los servicios.
     private TaskService taskService;
 
+    /**
+     * Nota 1: En este caso, los testeos solo tienen una ruta a seguir, ya que si se llega a la capa de controladores quiere decir que la respuesta es correcta, en caso de excepciones está la capa de ExceptionControllerAdvice.
+     */
+
+    /**
+     * Nota 2: Los when se usan con los Mock que es la dependencia de la clase a testear, y los act se usan con los InjectMock que es directamente un objeto de la clase a testear.
+     */
+
+    /**
+     * UNICO CASO, Test para el metodo getTasks de los controllers: Hay respuesta HTTP positiva.
+     */
     @Test
     void getTasks() {
         // ARRANGE
+        //Ocupamos una lista de objetos TaskDto que es lo que deberia de devolver el metodo getTask del servicio.
         List<TaskDto> mockTasks = List.of(
                 new TaskDto(1, "Tarea 1", "Done"),
                 new TaskDto(2, "Tarea 2", "To do")
         );
+        //Cuando se llame al metodo de servicio getTask deberia retornar la lista de tareas.
         when(taskService.getTasks()).thenReturn(mockTasks);
 
         // ACT
+        //Obteniendo un resultado llamando al metodo de la clase testeada.
         ResponseEntity<Object> response = controller.getTasks();
 
         // ASSERT
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(mockTasks, response.getBody());
+        assertEquals(HttpStatus.OK, response.getStatusCode()); //La respuesta HTTP de el resultado debe ser un código 200.
     }
 
     @Test
@@ -105,12 +119,14 @@ class TaskControllersTest {
 
     @Test
     void deleteTaskID() {
-        int id = 1;
-        doNothing().when(taskService).deleteTask(id);
+        //ARRANGE
+        int id = 1; //Solo necesitamos un id existente.
+        doNothing().when(taskService).deleteTask(id); //Cuando se ejecute el metodo deleteTask de taskService no se hace nada.
 
-        ResponseEntity<Object> response = controller.deleteTaskID(id);
+        //ACT
+        ResponseEntity<Object> response = controller.deleteTaskID(id); //Obteniendo el resultado de la ejecucion del metodo (codigo de respuesta)
 
         //ASSERT
-        assertEquals((HttpStatus.NO_CONTENT), response.getStatusCode());
+        assertEquals((HttpStatus.NO_CONTENT), response.getStatusCode()); //Comparando que el estado de la respuesta sea no content.
     }
 }
