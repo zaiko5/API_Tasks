@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+//DTO para datos de salida al usuario sobre su token.
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
