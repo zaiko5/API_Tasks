@@ -8,7 +8,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
 
-//Clase que adapta tu modelo de usuario al formato que necesita Spring Security para autenticación, define los retornos de username, pssw encriptada, los permisos que puede tener tu usuario, si la cuenta ya expiró, etc.
+//Clase que adapta tu modelo de usuario al formato que necesita Spring Security para autenticación, define los retornos de username, psswd encriptada, los permisos que puede tener tu usuario, si la cuenta ya expiró, etc.
 //Esta clase por lo general siempre tiene estas funciones.
 @AllArgsConstructor //Constructor
 public class UserDetailsImpl implements UserDetails{
