@@ -30,6 +30,13 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter { //Con esta h
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException { //Puede lanzar una excepcion.
 
+        String uri = request.getRequestURI();
+
+        if (uri.equals("/login")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String authHeader = request.getHeader("Authorization"); //Extraer el valor del header authorization de la solicitud HTTP.
 
         //SI el header no es null y empieza con bearer...

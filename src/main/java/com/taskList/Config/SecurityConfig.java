@@ -1,7 +1,6 @@
 package com.taskList.Config;
 
 import com.taskList.Auth.JWTAuthenticationFilter;
-import com.taskList.Auth.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
