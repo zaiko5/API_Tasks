@@ -10,8 +10,9 @@ import lombok.NoArgsConstructor;
 public class UserRequestDto {
     private String username;
     private String password;
-    private final String rol = "USER";
+    private final String rol = "USER"; //Rol estatico para cuando se quiera registrar un usuario no ueda modificarlo
 
+    //Constructor con solo 2 argumentos para que no se pueda modificar el rol desde el constructor.
     public UserRequestDto(String username, String password) {
         this.username = username;
         this.password = password;

@@ -28,10 +28,14 @@ public class AuthController {
     @Autowired
     private UserServiceImpl userService;
 
-    //Peticion post (enviar datos al server para que haga algo con ellos) para verificar si el usuario está o no registrado
+    /**
+     * Peticion post con ruta login para iniciar sesion.
+     * @param loginRequest pasado por JSON que tendrá el usuario y la contraseña
+     * @return el token si es que el usuario y la psswd son correctos, si no, lanza una excepcion 403 (no autorizado)
+     */
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody UserRequestDto loginRequest) { //Pidiendo datos desde el Front.
-        Authentication auth = authManager.authenticate(  //Verificando la autenticacion del token.
+        Authentication auth = authManager.authenticate(  //Verificando la autenticacion del usuario.
                 new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword())
         );
 
@@ -41,10 +45,14 @@ public class AuthController {
         return ResponseEntity.ok().body(Map.of("token", jwt)); //Retornar el token
     }
 
-    //Peticion post para agregar un nuevo usuario, siempre que se llegue a este punto será porque el usuario se registró con exito.
+    /**
+     * Peticion post para registrar a un usuario.
+     * @param signinRequest Pasado por JSON con usuario y contraseña nuevos
+     * @return Un codigo 200 diciendo que el usuario fue registrado con exito, si no, las excepciones se manejan en el servicio.
+     */
     @PostMapping("/signin")
     public ResponseEntity<?> signin(@RequestBody UserRequestDto signinRequest) {
-        UserRequestDto user = userService.postUser(signinRequest);
+        UserRequestDto user = userService.postUser(signinRequest); //Registrando al usuario en la BDD con el servicio.
         return ResponseEntity.ok().body("Usuario registrado con exito");
     }
 }
