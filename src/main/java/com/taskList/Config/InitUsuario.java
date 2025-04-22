@@ -7,7 +7,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-//Agregando un usuario a la DB.
+//Agregando un usuario manualmente a la DDBB (Para usuarios ADMIN)
 @Component
 public class InitUsuario implements CommandLineRunner {
 
@@ -23,7 +23,7 @@ public class InitUsuario implements CommandLineRunner {
             UserEntity user = new UserEntity();
             user.setUsername("Axel");
             user.setPassword(encoder.encode("1234"));
-            user.setRol("USER");
+            user.setRol("ADMIN");
             userRepository.save(user);
         }
     }

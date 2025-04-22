@@ -21,4 +21,11 @@ public class UserEntity {
     private String password;
 
     private String rol; //"USER" o "ADMIN"
+
+    //Constructor sin id para cambiar de DTOSignin a UserEntity para guardarlo en la BDD.
+    public UserEntity(String username, String password, String rol) {
+        this.username = username;
+        this.password = password;
+        this.rol = rol;
+    }
 }

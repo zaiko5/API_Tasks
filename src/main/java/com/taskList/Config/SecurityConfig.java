@@ -33,7 +33,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable()) // 1. Desactiva CSRF (útil para APIs REST)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 2. No usamos sesiones, usamos JWT
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login").permitAll() // 3. Permitimos que todos accedan al login
+                        .requestMatchers("/login", "/signin").permitAll() // 3. Permitimos que todos accedan al login y al signin
                         .anyRequest().authenticated() // 4. Todo lo demás necesita estar autenticado
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class) // 5. Agregamos el filtro JWT antes del de login

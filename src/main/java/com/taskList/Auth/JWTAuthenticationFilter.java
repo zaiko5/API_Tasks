@@ -32,11 +32,12 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter { //Con esta h
 
         String uri = request.getRequestURI();
 
-        if (uri.equals("/login")) {
+        //Definiendo que solo la ruta login y signin van a ser pyublicas, seguirán con la cadena de filtros.
+        if (uri.equals("/login") || uri.equals("/signin")) {
             filterChain.doFilter(request, response);
             return;
         }
-
+        
         String authHeader = request.getHeader("Authorization"); //Extraer el valor del header authorization de la solicitud HTTP.
 
         //SI el header no es null y empieza con bearer...
