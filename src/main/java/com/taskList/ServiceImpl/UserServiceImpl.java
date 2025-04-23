@@ -1,10 +1,16 @@
 package com.taskList.ServiceImpl;
+import com.taskList.Auth.JWTService;
 import com.taskList.DTOs.UserRequestDto;
 import com.taskList.Entities.UserEntity;
 import com.taskList.Mappers.UserMapper;
 import com.taskList.Repository.UserRepository;
 import com.taskList.Services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +25,24 @@ public class UserServiceImpl implements UserService {
     //Para encriptar la contraseña
     @Autowired
     private PasswordEncoder encoder;
+
+    @Autowired
+    private AuthenticationManager authManager; //Para autenticar con el username y el password pasado.
+
+    @Autowired
+    private JWTService jwtService; //Para generar el token.
+
+
+    @Override
+    public String login(UserRequestDto login){
+        Authentication auth = authManager.authenticate(  //Verificando la autenticacion del usuario.
+                new UsernamePasswordAuthenticationToken(login.getUsername(), login.getPassword())
+        );
+        SecurityContextHolder.getContext().setAuthentication(auth);
+        UserDetails userDetails = (UserDetails) auth.getPrincipal();
+        String jwt = jwtService.generarToken(userDetails); //Generando el token si es que los datos son correctos.
+        return jwt;
+    }
 
     //Funcion para agregar un usuario a la base de datos.
     @Override

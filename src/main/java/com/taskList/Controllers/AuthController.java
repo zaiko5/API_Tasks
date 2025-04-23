@@ -35,13 +35,7 @@ public class AuthController {
      */
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody UserRequestDto loginRequest) { //Pidiendo datos desde el Front.
-        Authentication auth = authManager.authenticate(  //Verificando la autenticacion del usuario.
-                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword())
-        );
-
-        SecurityContextHolder.getContext().setAuthentication(auth);
-        UserDetails userDetails = (UserDetails) auth.getPrincipal();
-        String jwt = jwtService.generarToken(userDetails); //Generando el token si es que los datos son correctos.
+        String jwt = userService.login(loginRequest);
         return ResponseEntity.ok().body(Map.of("token", jwt)); //Retornar el token
     }
 
