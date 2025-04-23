@@ -1,13 +1,19 @@
 package com.taskList.Auth;
 
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -40,32 +46,55 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter { //Con esta h
         
         String authHeader = request.getHeader("Authorization"); //Extraer el valor del header authorization de la solicitud HTTP.
 
-        //SI el header no es null y empieza con bearer...
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            // Lanzar excepción personalizada para peticiones sin token
+            throw new AuthenticationException("Token de autenticación no proporcionado o con formato incorrecto") {};
+        }
+
+        try {
             //Extrayendo el token generando un substring despues de los primeros 7 caracteres (bearer y el espacio).
             String token = authHeader.substring(7);
+
             //Extrayendo el username de el token.
             String username = jwtService.extraerUsername(token);
 
-            //Si el username no es null y el contexto de seguridad de la app tiene una autenticacion valida.
-            //SI getAuthentication es null, entonces no hay un usuario autenticado y se debe realizar el proceso de autenticación basado en el token
-            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                //Creamos  un objeto userDetails en base a UDI y su metodo loadByUserName
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-                //Si la validacion del token es true...
-                if (jwtService.validarToken(token, userDetails)) {
-                    //hacer que el usuario esté autenticado en la sesión actual de la aplicación.
-                    UsernamePasswordAuthenticationToken authToken =
-                            new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()); //Pasandole los roles y permisos del usuario.
-
-                    // Se agregan detalles de la solicitud HTTP al token de autenticación
-                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    // Establecer la autenticación en el contexto de seguridad
-                    SecurityContextHolder.getContext().setAuthentication(authToken);
-                }
+            // Si no se pudo extraer el username del token
+            if (username == null) {
+                throw new JwtException("Token inválido: no contiene información de usuario");
             }
+
+            // Cargar detalles del usuario
+            UserDetails userDetails;
+            try {
+                userDetails = userDetailsService.loadUserByUsername(username);
+            } catch (UsernameNotFoundException ex) {
+                throw new AuthenticationException("Usuario no encontrado: " + ex.getMessage()) {};
+            }
+
+            // Validar el token
+            if (!jwtService.validarToken(token, userDetails)) {
+                throw new JwtException("Token inválido o manipulado");
+            }
+
+            // Si llegamos aquí, el token es válido, establecer la autenticación
+            UsernamePasswordAuthenticationToken authToken =
+                    new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+            authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            SecurityContextHolder.getContext().setAuthentication(authToken);
+
+            // Continuar con la cadena de filtros
+            filterChain.doFilter(request, response);
+
+        } catch (ExpiredJwtException ex) {
+            throw new JwtException("El token ha expirado");
+        } catch (UnsupportedJwtException ex) {
+            throw new JwtException("Token no soportado");
+        } catch (MalformedJwtException ex) {
+            throw new JwtException("Token malformado");
+        } catch (JwtException ex) {
+            throw ex; // Re-lanzar para que sea manejada por el GlobalExceptionHandler
+        } catch (Exception ex) {
+            throw new JwtException("Error en la autenticación: " + ex.getMessage());
         }
-        //continuar el procesamiento de la solicitud HTTP a través de la cadena de filtros.
-        filterChain.doFilter(request, response);
     }
 }

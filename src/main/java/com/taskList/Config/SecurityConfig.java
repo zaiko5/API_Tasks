@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -26,6 +27,9 @@ public class SecurityConfig {
     @Autowired //Inyectando jwtFilter para
     private JWTAuthenticationFilter jwtFilter;
 
+    @Autowired
+    private CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+
     //decirle a Spring Security qué debe proteger, cómo debe protegerlo, y con qué filtros debe trabajar.
     @Bean //Definiendo que esta función será un bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception { //Puede lanzar una excepcion.
@@ -37,6 +41,9 @@ public class SecurityConfig {
                         .anyRequest().authenticated() // 4. Todo lo demás necesita estar autenticado
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class) // 5. Agregamos el filtro JWT antes del de login
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(customAuthenticationEntryPoint)
+                )
                 .build(); // 6. Construimos el filtro
     }
 
