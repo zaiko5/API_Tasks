@@ -41,6 +41,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated() // 4. Todo lo demás necesita estar autenticado
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class) // 5. Agregamos el filtro JWT antes del de login
+                //Agregando el handling para la excepcion del authenticationEntryPoint (Manejo de excepciones SSC, para el manejo de Controllers se hace en el handler global.
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(customAuthenticationEntryPoint)
                 )

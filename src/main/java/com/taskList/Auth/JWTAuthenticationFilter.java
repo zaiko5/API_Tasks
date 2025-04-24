@@ -47,10 +47,11 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter { //Con esta h
         String authHeader = request.getHeader("Authorization"); //Extraer el valor del header authorization de la solicitud HTTP.
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            // Lanzar excepción personalizada para peticiones sin token
-            throw new AuthenticationException("Token de autenticación no proporcionado o con formato incorrecto") {};
+            request.setAttribute("customErrorMessage", "Falta el token o es incorrecto");
+            throw new JwtException("Authentication Error"); //Mensaje generico
         }
 
+        //Capturando la excepcion.
         try {
             //Extrayendo el token generando un substring despues de los primeros 7 caracteres (bearer y el espacio).
             String token = authHeader.substring(7);
@@ -60,19 +61,22 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter { //Con esta h
 
             // Si no se pudo extraer el username del token
             if (username == null) {
-                throw new JwtException("Token inválido: no contiene información de usuario");
+                request.setAttribute("customErrorMessage","Token inválido: no contiene información de usuario");
+                throw new JwtException("Authentication Error"); //Mensaje generico
             }
 
             // Cargar detalles del usuario
             UserDetails userDetails;
-            try {
+            try { //Capturando excepcion.
                 userDetails = userDetailsService.loadUserByUsername(username);
             } catch (UsernameNotFoundException ex) {
+                request.setAttribute("customErrorMessage","Usuario no encontrado: " + ex.getMessage());
                 throw new AuthenticationException("Usuario no encontrado: " + ex.getMessage()) {};
             }
 
             // Validar el token
             if (!jwtService.validarToken(token, userDetails)) {
+                request.setAttribute("customErrorMessage","Token inválido o manipulado");
                 throw new JwtException("Token inválido o manipulado");
             }
 
@@ -85,15 +89,20 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter { //Con esta h
             // Continuar con la cadena de filtros
             filterChain.doFilter(request, response);
 
+            //Lanzando posibles excepciones sobre el token (No se usan los mensajes, el mensaje se define en el customAuthenticationEntryPoint.
         } catch (ExpiredJwtException ex) {
+            request.setAttribute("customErrorMessage","El token ha expirado");
             throw new JwtException("El token ha expirado");
         } catch (UnsupportedJwtException ex) {
+            request.setAttribute("customErrorMessage","Token no soportado");
             throw new JwtException("Token no soportado");
         } catch (MalformedJwtException ex) {
+            request.setAttribute("customErrorMessage","Token mal formado");
             throw new JwtException("Token malformado");
         } catch (JwtException ex) {
             throw ex; // Re-lanzar para que sea manejada por el GlobalExceptionHandler
         } catch (Exception ex) {
+            request.setAttribute("customErrorMessage","Error en la autenticacion" + ex.getMessage());
             throw new JwtException("Error en la autenticación: " + ex.getMessage());
         }
     }

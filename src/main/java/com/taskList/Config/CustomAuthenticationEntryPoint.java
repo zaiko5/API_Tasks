@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.util.Map;
 
+
 @Component
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
     @Override
@@ -17,11 +18,21 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
                          HttpServletResponse response,
                          AuthenticationException authException) throws IOException {
 
+
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType("application/json");
+
+        // Primero intenta obtener el mensaje personalizado
+        String errorMessage = (String) request.getAttribute("customErrorMessage");
+
+        // Si no hay mensaje personalizado, usa el de la excepción
+        if (errorMessage == null) {
+            errorMessage = authException.getMessage();
+        }
+
         response.getWriter().write(
                 new ObjectMapper().writeValueAsString(
-                        Map.of("error", "No estás autenticado. Inicia sesión para acceder.")
+                        Map.of("error", errorMessage)
                 )
         );
     }
