@@ -21,6 +21,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 //Interceptar el request, y validar (o no) el JWT y a su vez cargar el user en la DB, cuando no existe el token o es invalido, solo lo ignora.
+//Aqui ya se lanzan excepciones que tienen que ver con el inicio de sesion o validacion del token, los mensajes genericos de las excepciones no se usan, solo son para que no se marque error.
 @Component //Creando el componente
 public class JWTAuthenticationFilter extends OncePerRequestFilter { //Con esta herencia, solo se ejecutará una vez por request
 
@@ -71,13 +72,13 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter { //Con esta h
                 userDetails = userDetailsService.loadUserByUsername(username);
             } catch (UsernameNotFoundException ex) {
                 request.setAttribute("customErrorMessage","Usuario no encontrado: " + ex.getMessage());
-                throw new AuthenticationException("Usuario no encontrado: " + ex.getMessage()) {};
+                throw new AuthenticationException("Authentication Error") {}; //M;ensaje generico, no se usa.
             }
 
             // Validar el token
             if (!jwtService.validarToken(token, userDetails)) {
                 request.setAttribute("customErrorMessage","Token inválido o manipulado");
-                throw new JwtException("Token inválido o manipulado");
+                throw new JwtException("Authentication Error"); //Mensaje generico
             }
 
             // Si llegamos aquí, el token es válido, establecer la autenticación
@@ -92,18 +93,18 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter { //Con esta h
             //Lanzando posibles excepciones sobre el token (No se usan los mensajes, el mensaje se define en el customAuthenticationEntryPoint.
         } catch (ExpiredJwtException ex) {
             request.setAttribute("customErrorMessage","El token ha expirado");
-            throw new JwtException("El token ha expirado");
+            throw new JwtException("Authentication Error"); //Mensaje generico
         } catch (UnsupportedJwtException ex) {
             request.setAttribute("customErrorMessage","Token no soportado");
-            throw new JwtException("Token no soportado");
+            throw new JwtException("Authentication Error"); //Mensaje generico
         } catch (MalformedJwtException ex) {
             request.setAttribute("customErrorMessage","Token mal formado");
-            throw new JwtException("Token malformado");
+            throw new JwtException("Authentication Error"); //Mensaje generico
         } catch (JwtException ex) {
             throw ex; // Re-lanzar para que sea manejada por el GlobalExceptionHandler
         } catch (Exception ex) {
             request.setAttribute("customErrorMessage","Error en la autenticacion" + ex.getMessage());
-            throw new JwtException("Error en la autenticación: " + ex.getMessage());
+            throw new JwtException("Authentication Error"); //Mensaje generico, no se usa.
         }
     }
 }
