@@ -3,6 +3,7 @@ package com.taskList.Controllers;
 import com.taskList.Auth.JWTService;
 import com.taskList.DTOs.UserRequestDto;
 import com.taskList.ServiceImpl.UserServiceImpl;
+import com.taskList.Services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,14 +20,9 @@ import java.util.Map;
 //Controlador con un solo endPoint para recibir datos y retornar el token al usuario.
 @RestController
 public class AuthController {
-    @Autowired
-    private AuthenticationManager authManager; //Para autenticar con el username y el password pasado.
 
     @Autowired
-    private JWTService jwtService; //Para generar el token.
-
-    @Autowired
-    private UserServiceImpl userService;
+    private UserService userService;
 
     /**
      * Peticion post con ruta login para iniciar sesion.
